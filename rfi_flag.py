@@ -24,7 +24,7 @@ for uvfile in sys.argv[1:]:
 	dvar = np.var(data, axis=0, dtype=np.complex)
 	
 	def rfiflag(uv, p, d, f):
-		f = np.where(abs(d)<6*dvar**(1/2), f, False)
+		f = np.where(abs(d)<6*dvar**(1/2.), f, False)
 		return p, d, f
 
 	uv.rewind()
