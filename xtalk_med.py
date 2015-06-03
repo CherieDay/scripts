@@ -27,11 +27,3 @@ for uvfile in sys.argv[1:]:
 	uvo.init_from_uv(uv)
 	uvo.pipe(uv, mfunc=med, raw=True,
 		append2hist="Subtracted median for each frequency channel for cross-correlation (0,7)\n")
-
-#	def medavg(uv, p, d, f):
-#		uv.rewind()
-#		d -= med_data
-#		data = np.array([d for p,d,f in uv.all(raw=True)], dtype=np.complex)
-#		avg_data = np.mean(data.real, axis=0) + 1j*np.mean(data.imag, axis=0)
-#		d -= avg_data
-#		return p, d, f
