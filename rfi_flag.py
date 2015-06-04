@@ -39,8 +39,8 @@ for uvfile in args:
 	
 	def rfiflag(uv, p, d, f):
 		n = float(opts.nsigma)
-		if opts.mode == 'mean': return p, d, np.where(abs(d)<n*sig_mean, f, True)
-		elif opts.mode == 'median': return p, d, np.where(abs(d)<n*sig_med, f, True)
+		if opts.mode == 'mean': return p, np.where(abs(d)<n*sig_mean, d, 0.), np.where(abs(d)<n*sig_mean, f, True)
+		elif opts.mode == 'median': return p, np.where(abs(d)<n*sig_med, d, 0.), np.where(abs(d)<n*sig_med, f, True)
 		else:  raise ValueError('Must specify either mean or median and/or nsigma.')
 
 	uv.rewind()
