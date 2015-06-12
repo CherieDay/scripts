@@ -36,7 +36,9 @@ for uvfile in args:
 
 	#Get the variance for each frequency channel
 	sig_mean = np.sqrt(np.var(data, axis=0, dtype=np.complex))
-	sig_med = np.sqrt(np.median((abs(data-np.median(data,axis=0)))**2,axis=0))
+	med_data = np.median(data.real, axis=0) + 1j*np.median(data.imag, axis=0)
+	med_abs = np.median(abs((data-med_data).real)**2, axis=0) + 1j*np.median(abs((data-med_data).imag)**2, axis=0)
+	sig = np.sqrt(med_abs.real)+1j*np.sqrt(med_abs.imag)
 	
 	#Determine outlier tolerance level
 		#nout is the number of data values outside i sigma
@@ -52,7 +54,7 @@ for uvfile in args:
 	def rfiflag(uv, p, d, f):
 		#n = float(opts.nsigma)
 		if opts.mode == 'mean': return p, np.where(abs(d)<=n*sig_mean, d, 0.), np.where(abs(d)<n*sig_mean, f, True)
-		elif opts.mode == 'median': return p, np.where(abs(d)<=n*sig_med, d, 0.), np.where(abs(d)<n*sig_med, f, True)
+		elif opts.mode == 'median': return p, np.where(abs(d)<=n*sig, d, 0.), np.where(abs(d)<n*sig_med, f, True)
 		else:  raise ValueError('Must specify either mean or median and/or nsigma.')
 
 	uv.rewind()
