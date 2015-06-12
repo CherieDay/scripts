@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+from __future__ import division
 
 import numpy as np, aipy as a, sys, optparse
 from math import erf
@@ -26,17 +27,25 @@ for uvfile in sys.argv[1:]:
 			break
 		i+=0.1
 	print n
-	print len(data)*(1-erf(n/np.sqrt(2.)))
+#	print len(data)*(1-erf(n/np.sqrt(2.)))
 
-	#Set flagged data values to zero
-	data = np.where(abs(data)<=n*sig, data, 0.)
-	
+	#Set flagged data values to zero using the median absolute deviation (MAD)
+	for i in range(0,1023):
+		absn = abs((data[:,i]-med_data[i]).real) + 1j*abs((data[:,i]-med_data[i]).imag)
+		mad = np.median(absn.real) + 1j*np.median(absn.imag)
+		data[:,i] = np.where((abs(absn/(1.4826*mad)))<=n, data[:,i], 0.)
+#		data[:,i] = np.where((absn.imag/(1.4826*mad.imag))<=n, data[:,i], 0.)
+		mad = np.where(abs(mad)!=0., mad, 1j)
+
 	#Take the median of all the times in each frequency channel for real and imaginary
 	#components of data
-	med_data = np.median(data.real, axis=0) + 1j*np.median(data.imag, axis=0)
+	new_med_data = np.median(data.real, axis=0) + 1j*np.median(data.imag, axis=0)
 
 	def rfiflag(uv, p, d, f):
-		return p, np.where(abs(d)<=n*sig, d, 0.)-med_data, np.where(abs(d)<n*sig, f, True)
+		absn = abs((d-med_data).real) + 1j*abs((d-med_data).imag)
+		mad = np.median(absn.real) + 1j*np.median(absn.imag)
+		mad = np.where(abs(mad)!=0., mad, 1j)
+		return p, np.where((abs(absn/(1.4826*mad)))<=n, d, 0.)-new_med_data, np.where((abs(absn/(1.4826*mad)))<n, f, True)
 
 	uv.rewind()
 	uvo = a.miriad.UV(uvfile+'RmM', status='new')
