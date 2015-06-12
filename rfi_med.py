@@ -12,7 +12,9 @@ for uvfile in sys.argv[1:]:
 	data = np.array([d for p,d,f in uv.all(raw=True)], dtype=np.complex)
 
 	#Get the variance for each frequency channel
-	sig = np.sqrt(np.median((abs(data-np.median(data,axis=0)))**2,axis=0))
+	med_data = np.median(data.real, axis=0) + 1j*np.median(data.imag, axis=0)
+	med_abs = np.median(abs((data-med_data).real)**2, axis=0) + 1j*np.median(abs((data-med_data).imag)**2, axis=0)
+	sig = np.sqrt(med_abs.real)+1j*np.sqrt(med_abs.imag)
 
 	#Determine outlier tolerance level using Chauvenet's criterion
 		#nout is the number of data values outside i sigma
