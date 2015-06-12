@@ -3,14 +3,6 @@
 import numpy as np, aipy as a, sys, optparse
 from math import erf
 
-o = optparse.OptionParser()
-o.set_usage('rfi_flag.py [options] *.uv')
-o.set_description(__doc__)
-#o.add_option('-m', '--mode', dest='mode', default='median',
-#    help='Use the root median squared deviation from the median to calculate the standard deviation for RFI flagging. e.g -m median.')
-
-opts, args = o.parse_args(sys.argv[1:])
-
 for uvfile in args:
 	print uvfile
 	uv = a.miriad.UV(uvfile)
@@ -20,8 +12,8 @@ for uvfile in args:
 	data = np.array([d for p,d,f in uv.all(raw=True)], dtype=np.complex)
 
 	#Get the variance for each frequency channel
-	sig_med = np.sqrt(np.median((abs(data-np.median(data,axis=0)))**2,axis=0))
-	
+	sig = np.sqrt(np.median((abs(data-np.median(data,axis=0)))**2,axis=0))
+
 	#Determine outlier tolerance level using Chauvenet's criterion
 		#nout is the number of data values outside i sigma
 		#n will be the number of sigma outside of which data will be flagged
@@ -31,16 +23,18 @@ for uvfile in args:
 			n = i
 			break
 		i+=0.1
+	print n
+	print len(data)*(1-erf(n/np.sqrt(2.)))
 
 	#Set flagged data values to zero
-	data = np.where(abs(data)<=n*sig_med, data, 0.)
+	data = np.where(abs(data)<=n*sig, data, 0.)
 	
 	#Take the median of all the times in each frequency channel for real and imaginary
 	#components of data
 	med_data = np.median(data.real, axis=0) + 1j*np.median(data.imag, axis=0)
 
 	def rfiflag(uv, p, d, f):
-		return p, np.where(abs(d)<=n*sig_med, d, 0.)-med_data, np.where(abs(d)<n*sig_med, f, True)
+		return p, np.where(abs(d)<=n*sig, d, 0.)-med_data, np.where(abs(d)<n*sig, f, True)
 
 	uv.rewind()
 	uvo = a.miriad.UV(uvfile+'RmM', status='new')
