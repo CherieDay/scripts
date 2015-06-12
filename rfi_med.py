@@ -3,6 +3,12 @@
 import numpy as np, aipy as a, sys, optparse
 from math import erf
 
+o = optparse.OptionParser()
+o.set_usage('rfi_flag.py [options] *.uv')
+o.set_description(__doc__)
+
+opts, args = o.parse_args(sys.argv[1:])
+
 for uvfile in args:
 	print uvfile
 	uv = a.miriad.UV(uvfile)
