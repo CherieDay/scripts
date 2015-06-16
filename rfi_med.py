@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 from __future__ import division
 
-import numpy as np, aipy as a, sys, optparse
+import numpy as np, aipy as a, sys, optparse, matplotlib.pyplot as plt
 from math import erf
 from scipy.special import erfinv
 
@@ -18,20 +18,23 @@ for uvfile in sys.argv[1:]:
 	sig = np.sqrt(np.median(np.abs(data-med_data)**2, axis=0))
 
 	# Determine outlier tolerance level using Chauvenet's criterion
-		# n will be the number of sigma outside of which data will be flagged
+		# nsig will be the number of sigma outside of which data will be flagged
 	n = np.sqrt(2) * erfinv(1 - 0.5/len(data))
-	nsig = 1.4826 * n * sig   # Prefactor from Gaussian statistics in complex plane
+	nsig = n * sig   # Prefactor (1.4826) from Gaussian statistics in complex plane
+	print n, nsig[57]
+	s = np.zeros(len(data)) + sig[57]
+	plt.plot(np.abs(data[:,57]))
+	plt.plot(s)
+	plt.show()
 
 	def rfiflag(uv, p, d, f):
 		absn = np.abs(d-med_data)
 		f = np.where(absn > nsig, 1, f)
 		return p, np.where(f,0,d), f
 
-	uv.rewind()
-	uvo = a.miriad.UV(uvfile+'R', status='new')
-	uvo.init_from_uv(uv)
-	uvo.pipe(uv, mfunc=rfiflag, raw=True,
-		append2hist='''Flagged values in data greater then nsig (determined using
-		Chauvenet's criterion) for each frequency channel for cross-correlation (0,7)\n''')
-
-
+#	uv.rewind()
+#	uvo = a.miriad.UV(uvfile+'R', status='new')
+#	uvo.init_from_uv(uv)
+#	uvo.pipe(uv, mfunc=rfiflag, raw=True,
+#		append2hist='''Flagged values in data greater then nsig (determined using
+#		Chauvenet's criterion) for each frequency channel for cross-correlation (0,7)\n''')
