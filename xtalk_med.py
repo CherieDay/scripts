@@ -40,4 +40,4 @@ for uvfile in args:
 		uvo = a.miriad.UV(uvfile+'me',status='new')
 	uvo.init_from_uv(uv)
 	uvo.pipe(uv, mfunc=med, raw=True,
-		append2hist="Subtracted median for each frequency channel for cross-correlation (0,7)\n")
+		append2hist="Subtracts median (m) or mean (me) for each frequency channel for cross-correlation (0,7)\n")
