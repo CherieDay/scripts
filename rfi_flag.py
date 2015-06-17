@@ -15,6 +15,7 @@
 
 import numpy as np, aipy as a, sys, optparse
 from math import erf
+from scipy.special import erfinv
 
 o = optparse.OptionParser()
 o.set_usage('rfi_flag.py [options] *.uv')
