@@ -20,21 +20,17 @@ for uvfile in sys.argv[1:]:
 	# Determine outlier tolerance level using Chauvenet's criterion
 		# nsig will be the number of sigma outside of which data will be flagged
 	n = np.sqrt(2) * erfinv(1 - 0.5/len(data))
-	nsig = n * sig   # Prefactor (1.4826) from Gaussian statistics in complex plane
-	print n, nsig[57]
-	s = np.zeros(len(data)) + sig[57]
-	plt.plot(np.abs(data[:,57]))
-	plt.plot(s)
-	plt.show()
+	nsig = n * sig
 
 	def rfiflag(uv, p, d, f):
 		absn = np.abs(d-med_data)
+		nsig = n * np.median(absn)
 		f = np.where(absn > nsig, 1, f)
 		return p, np.where(f,0,d), f
 
-#	uv.rewind()
-#	uvo = a.miriad.UV(uvfile+'R', status='new')
-#	uvo.init_from_uv(uv)
-#	uvo.pipe(uv, mfunc=rfiflag, raw=True,
-#		append2hist='''Flagged values in data greater then nsig (determined using
-#		Chauvenet's criterion) for each frequency channel for cross-correlation (0,7)\n''')
+	uv.rewind()
+	uvo = a.miriad.UV(uvfile+'R', status='new')
+	uvo.init_from_uv(uv)
+	uvo.pipe(uv, mfunc=rfiflag, raw=True,
+		append2hist='''Flagged values in data greater then nsig (determined using
+		Chauvenet's criterion) for each frequency channel for cross-correlation (0,7)\n''')
