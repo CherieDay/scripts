@@ -21,8 +21,6 @@ o.set_usage('rfi_flag.py [options] *.uv')
 o.set_description(__doc__)
 o.add_option('-m', '--mode', dest='mode', default='mean',
     help='Use either the standard definition of variance and standard deviation or use the root median squared deviation from the median to calculate the standard deviation for RFI flagging. e.g -m median. The mean is the default.')
-#o.add_option('-n', '--nsigma', dest='nsigma', default='5',
-#	help='The number of sigma desired for the tolerance level. That is, all values greater than nsigma will be flagged. e.g -n 5. 5 is the default.')
 
 opts, args = o.parse_args(sys.argv[1:])
 
@@ -37,24 +35,15 @@ for uvfile in args:
 	#Get the variance for each frequency channel
 	sig_mean = np.sqrt(np.var(data, axis=0, dtype=np.complex))
 	med_data = np.median(data.real, axis=0) + 1j*np.median(data.imag, axis=0)
-	med_abs = np.median(abs((data-med_data).real)**2, axis=0) + 1j*np.median(abs((data-med_data).imag)**2, axis=0)
-	sig = np.sqrt(med_abs.real)+1j*np.sqrt(med_abs.imag)
+	sig_med = np.sqrt(np.median(np.abs((data-med_data))**2, axis=0))
 	
 	#Determine outlier tolerance level
-		#nout is the number of data values outside i sigma
-		#n will be the number of sigma outside of which data will be flagged
-	i = 0
-	while i < 7:
-		nout = len(data)*(1-erf(i/np.sqrt(2.)))
-		if nout<0.5:
-			n = i
-			break
-		i+=0.1
-	
+		#n is be the number of sigma outside of which data will be flagged
+	n = np.sqrt(2) * erfinv(1 - 0.5/len(data))
+
 	def rfiflag(uv, p, d, f):
-		#n = float(opts.nsigma)
 		if opts.mode == 'mean': return p, np.where(abs(d)<=n*sig_mean, d, 0.), np.where(abs(d)<n*sig_mean, f, True)
-		elif opts.mode == 'median': return p, np.where(abs(d)<=n*sig, d, 0.), np.where(abs(d)<n*sig_med, f, True)
+		elif opts.mode == 'median': return p, np.where(abs(d)<=n*sig_med, d, 0.), np.where(abs(d)<n*sig_med, f, True)
 		else:  raise ValueError('Must specify either mean or median and/or nsigma.')
 
 	uv.rewind()
