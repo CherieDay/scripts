@@ -22,9 +22,13 @@ for uvfile in sys.argv[1:]:
 	n = np.sqrt(2) * erfinv(1 - 0.5/len(data))
 	nsig = n * sig
 
+	# Want to flag on a channel by channel basis and fix n to the best amount
+	# to flag per channel since we don't want to throw everything out--just the big
+	# outliers in each channel--even if most of a channel is bad. If we want to work
+	# in a channel, we don't want the whole thing being flagged.
+
 	def rfiflag(uv, p, d, f):
 		absn = np.abs(d-med_data)
-		nsig = n * np.median(absn)
 		f = np.where(absn > nsig, 1, f)
 		return p, np.where(f,0,d), f
 
