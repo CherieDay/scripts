@@ -49,7 +49,7 @@ for uvfile in args:
 
 	uv.rewind()
 	if opts.mode == 'mean':
-		uvo = a.miriad.UV(uvfile+'R',status='new')
+		uvo = a.miriad.UV(uvfile+'Rm',status='new')
 	elif opts.mode == 'median':
 		uvo = a.miriad.UV(uvfile+'RM', status='new')
 	uvo.init_from_uv(uv)

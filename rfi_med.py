@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 from __future__ import division
-
+# Find median, then find average of mins away from median--so that the median and min are separated by a number of sigma--reflect that back up to a max--which become the threshold--so you have max+median
 import numpy as np, aipy as a, sys, optparse, matplotlib.pyplot as plt
 from math import erf
 from scipy.special import erfinv
